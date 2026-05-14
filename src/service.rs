@@ -10,5 +10,7 @@ pub fn execute_branch_create(args: Vec<String>) -> Result<String, String> {
     let summary = &args[3];
     let branch_name: String = build_branch_name(branch_type, issue, summary);
 
-    git_branch(branch_name)
+    git_branch(&branch_name)?;
+
+    Ok(branch_name)
 }

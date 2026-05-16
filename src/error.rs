@@ -14,10 +14,10 @@ impl fmt::Display for GitxError {
                 write!(f, "Usage: gitx <command> [args]")
             }
             GitxError::InvalidBranchArgs => {
-                write!(f, "Usage: gitx <command> <type> <issue> <summary>")
+                write!(f, "Usage: gitx branch <type> <issue> <summary>")
             }
             GitxError::InvalidDeleteArgs => {
-                write!(f, "Usage: gitx <branch_name>")
+                write!(f, "Usage: gitx delete <branch_name>")
             }
             GitxError::GitCommandFailed(err) => write!(f, "{}", err),
         }

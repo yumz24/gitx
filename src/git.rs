@@ -1,9 +1,9 @@
 use crate::error::GitxError;
 use std::process::Command;
 
-pub fn git_branch(branch_name: &str) -> Result<(), GitxError> {
+fn execute_git(args: &[&str]) -> Result<(), GitxError> {
     let output = Command::new("git")
-        .args(["checkout", "-b", branch_name])
+        .args(args)
         .output()
         .map_err(|e| GitxError::GitCommandFailed(e.to_string()))?;
 
@@ -13,4 +13,12 @@ pub fn git_branch(branch_name: &str) -> Result<(), GitxError> {
         let s = String::from_utf8_lossy(&output.stderr);
         Err(GitxError::GitCommandFailed(s.to_string()))
     }
+}
+
+pub fn git_branch(branch_name: &str) -> Result<(), GitxError> {
+    execute_git(&["checkout", "-b", branch_name])
+}
+
+pub fn git_delete(branch_name: &str) -> Result<(), GitxError> {
+    execute_git(&["branch", "-d", branch_name])
 }

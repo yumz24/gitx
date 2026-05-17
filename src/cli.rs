@@ -34,8 +34,7 @@ impl std::str::FromStr for Command {
 
 pub fn parse_command(args: &mut Args) -> Result<Command, GitxError> {
     let raw_command = args.next().ok_or(GitxError::InvalidCommand)?;
-
-    Ok(raw_command.parse()?)
+    raw_command.parse()
 }
 
 pub fn parse_branch_args(args: &mut Args) -> Result<BranchArgs, GitxError> {

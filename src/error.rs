@@ -4,6 +4,8 @@ pub enum GitxError {
     InvalidCommand,
     InvalidBranchArgs,
     InvalidDeleteArgs,
+    CannotDeleteCurrentBranch,
+    CannotDeleteProtectedBranch,
     GitCommandFailed(String),
 }
 
@@ -18,6 +20,12 @@ impl fmt::Display for GitxError {
             }
             GitxError::InvalidDeleteArgs => {
                 write!(f, "Usage: gitx delete <branch_name>")
+            }
+            GitxError::CannotDeleteCurrentBranch => {
+                write!(f, "Cannot delete current branch")
+            }
+            GitxError::CannotDeleteProtectedBranch => {
+                write!(f, "Cannot delete protected branch")
             }
             GitxError::GitCommandFailed(err) => write!(f, "{}", err),
         }

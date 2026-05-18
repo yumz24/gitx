@@ -27,7 +27,7 @@ impl std::str::FromStr for BranchType {
             "perf" => Ok(BranchType::Perf),
             "test" => Ok(BranchType::Test),
             "chore" => Ok(BranchType::Chore),
-            _ => Err(GitxError::InvalidArgs),
+            _ => Err(GitxError::InvalidBranchArgs),
         }
     }
 }

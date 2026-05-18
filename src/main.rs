@@ -13,17 +13,29 @@ mod error;
 mod git;
 mod service;
 
-use crate::cli::{Command, parse_args};
+use crate::cli::{Command, parse_branch_args, parse_command, parse_delete_args};
 use crate::error::GitxError;
 use crate::service::execute_branch_create;
+use crate::service::execute_branch_delete;
 use std::env;
 
 fn run() -> Result<(), GitxError> {
-    let args = parse_args(env::args())?;
+    let mut args = env::args();
 
-    match args.command {
+    let _program = args.next();
+
+    let command = parse_command(&mut args)?;
+
+    match command {
         Command::Branch => {
-            execute_branch_create(&args.branch_type, &args.issue, &args.summary)?;
+            let args = parse_branch_args(&mut args)?;
+            let branch_name = execute_branch_create(&args.branch_type, &args.issue, &args.summary)?;
+            println!("Created branch: {}", branch_name);
+        }
+        Command::Delete => {
+            let args = parse_delete_args(&mut args)?;
+            let branch_name = execute_branch_delete(&args.branch_name)?;
+            println!("Deleted branch: {}", branch_name);
         }
     };
 

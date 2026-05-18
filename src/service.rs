@@ -1,6 +1,9 @@
 use crate::branch::BranchType;
+use crate::branch::build_branch_name;
 use crate::error::GitxError;
-use crate::{branch::build_branch_name, git::git_branch};
+use crate::git::git_branch;
+use crate::git::git_current_branch;
+use crate::git::git_delete;
 
 pub fn execute_branch_create(
     branch_type: &BranchType,
@@ -12,4 +15,26 @@ pub fn execute_branch_create(
     git_branch(&branch_name)?;
 
     Ok(branch_name)
+}
+
+pub fn execute_branch_delete(branch_name: &str) -> Result<String, GitxError> {
+    let current_branch_name = git_current_branch()?;
+
+    // 削除対象のブランチがcurrent buranchなのかを検証
+    if current_branch_name == branch_name {
+        return Err(GitxError::CannotDeleteCurrentBranch);
+    }
+
+    if is_protected_branch(branch_name) {
+        return Err(GitxError::CannotDeleteProtectedBranch);
+    }
+
+    git_delete(branch_name)?;
+
+    Ok(branch_name.to_string())
+}
+
+fn is_protected_branch(branch_name: &str) -> bool {
+    const PROTECTED_BRANCHES: [&str; 2] = ["main", "master"];
+    PROTECTED_BRANCHES.contains(&branch_name)
 }

@@ -1,7 +1,6 @@
-use std::env::Args;
-
 use crate::branch::BranchType;
 use crate::error::GitxError;
+use std::env::Args;
 
 pub struct BranchArgs {
     pub branch_type: BranchType,

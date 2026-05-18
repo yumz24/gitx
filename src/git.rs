@@ -1,9 +1,9 @@
+use crate::debug;
 use crate::error::GitxError;
-use crate::logger::debug;
 use std::process::{Command, Output};
 
 fn run_git(args: &[&str]) -> Result<Output, GitxError> {
-    debug(&format!("git {:?}", args));
+    debug!("git {:?}", args);
 
     let output = Command::new("git")
         .args(args)

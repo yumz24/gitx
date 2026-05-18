@@ -11,10 +11,12 @@ mod branch;
 mod cli;
 mod error;
 mod git;
+mod logger;
 mod service;
 
 use crate::cli::{Command, parse_branch_args, parse_command, parse_delete_args};
 use crate::error::GitxError;
+use crate::logger::debug;
 use crate::service::execute_branch_create;
 use crate::service::execute_branch_delete;
 use std::env;
@@ -25,6 +27,8 @@ fn run() -> Result<(), GitxError> {
     let _program = args.next();
 
     let command = parse_command(&mut args)?;
+
+    debug(&format!("command: {:?}", command));
 
     match command {
         Command::Branch => {
@@ -43,6 +47,7 @@ fn run() -> Result<(), GitxError> {
 }
 
 fn main() {
+    debug("starting gitx");
     if let Err(err) = run() {
         eprintln!("{}", err);
     }

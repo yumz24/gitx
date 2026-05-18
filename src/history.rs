@@ -4,14 +4,18 @@ use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::PathBuf;
 
-pub fn append_history(command: &str, target: &str) -> Result<(), GitxError> {
-    // 1. 環境変数 "HOME" を取得
+fn history_file_path() -> Result<PathBuf, GitxError> {
     let home_dir = env::var("HOME").map_err(|e| GitxError::HistoryFailed(e.to_string()))?;
-    let dir_path = PathBuf::from(home_dir).join(".gitx");
 
-    std::fs::create_dir_all(&dir_path).map_err(|e| GitxError::HistoryFailed(e.to_string()))?;
+    Ok(PathBuf::from(home_dir).join(".gitx").join("history.log"))
+}
 
-    let file_path = dir_path.join("history.log");
+pub fn append_history(command: &str, target: &str) -> Result<(), GitxError> {
+    let file_path = history_file_path()?;
+
+    if let Some(parent) = file_path.parent() {
+        std::fs::create_dir_all(parent).map_err(|e| GitxError::HistoryFailed(e.to_string()))?;
+    }
 
     let mut file = OpenOptions::new()
         .create(true)
@@ -23,4 +27,13 @@ pub fn append_history(command: &str, target: &str) -> Result<(), GitxError> {
         .map_err(|e| GitxError::HistoryFailed(e.to_string()))?;
 
     Ok(())
+}
+
+pub fn read_history() -> Result<String, GitxError> {
+    let file_path = history_file_path()?;
+
+    let content =
+        std::fs::read_to_string(file_path).map_err(|e| GitxError::HistoryFailed(e.to_string()))?;
+
+    Ok(content)
 }

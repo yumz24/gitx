@@ -14,8 +14,9 @@ pub struct DeleteArgs {
 
 #[derive(Debug)]
 pub enum Command {
-    Branch, // ブランチ作成とチェックアウト
-    Delete, // ブランチ削除
+    Branch,  // ブランチ作成とチェックアウト
+    Delete,  // ブランチ削除
+    History, // gitxコマンドを実行した履歴を表示
 }
 
 // 文字列からenumへの変換処理
@@ -26,6 +27,7 @@ impl std::str::FromStr for Command {
         match s {
             "branch" => Ok(Command::Branch),
             "delete" => Ok(Command::Delete),
+            "history" => Ok(Command::History),
             _ => Err(GitxError::InvalidCommand),
         }
     }

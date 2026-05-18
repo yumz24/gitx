@@ -17,7 +17,7 @@ mod service;
 
 use crate::cli::{Command, parse_branch_args, parse_command, parse_delete_args};
 use crate::error::GitxError;
-use crate::service::{execute_branch_create, execute_branch_delete};
+use crate::service::{execute_branch_create, execute_branch_delete, execute_history};
 use std::env;
 
 fn run() -> Result<(), GitxError> {
@@ -40,6 +40,10 @@ fn run() -> Result<(), GitxError> {
             let branch_name = execute_branch_delete(&args.branch_name)?;
 
             println!("Deleted branch: {}", branch_name);
+        }
+        Command::History => {
+            let history = execute_history()?;
+            println!("{}", history);
         }
     };
 

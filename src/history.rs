@@ -5,13 +5,14 @@ use std::fmt;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::PathBuf;
+use std::str::FromStr;
 
 pub enum HistoryStatus {
     Success,
     Fail,
 }
 
-struct HistoryRecord {
+pub struct HistoryRecord {
     timestamp: String, // RFC3339
     status: HistoryStatus,
     command: String,
@@ -27,6 +28,21 @@ impl fmt::Display for HistoryStatus {
         }
     }
 }
+// 文字列からenumへの変換処理
+impl std::str::FromStr for HistoryStatus {
+    type Err = GitxError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "success" => Ok(HistoryStatus::Success),
+            "fail" => Ok(HistoryStatus::Fail),
+            _ => Err(GitxError::HistoryFailed(format!(
+                "invalid history status: {}",
+                s
+            ))),
+        }
+    }
+}
 
 impl HistoryRecord {
     fn new(status: HistoryStatus, command: &str, target: &str) -> Self {
@@ -38,6 +54,23 @@ impl HistoryRecord {
             command: command.to_string(),
             target: target.to_string(),
         }
+    }
+
+    fn from_line(line: &str) -> Option<Self> {
+        let split_record = line.split_whitespace().collect::<Vec<_>>();
+
+        if split_record.len() != 4 {
+            return None;
+        }
+
+        let record = HistoryRecord {
+            timestamp: split_record[0].to_string(),
+            status: HistoryStatus::from_str(split_record[1]).ok()?,
+            command: split_record[2].to_string(),
+            target: split_record[3].to_string(),
+        };
+
+        Some(record)
     }
 }
 
@@ -81,11 +114,16 @@ pub fn append_history(
     Ok(())
 }
 
-pub fn read_history() -> Result<String, GitxError> {
+pub fn read_history() -> Result<Vec<HistoryRecord>, GitxError> {
     let file_path = history_file_path()?;
 
     let content =
         std::fs::read_to_string(file_path).map_err(|e| GitxError::HistoryFailed(e.to_string()))?;
 
-    Ok(content)
+    let records = content
+        .lines()
+        .filter_map(HistoryRecord::from_line)
+        .collect::<Vec<_>>();
+
+    Ok(records)
 }

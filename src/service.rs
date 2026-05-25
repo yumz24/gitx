@@ -64,9 +64,14 @@ fn is_protected_branch(branch_name: &str) -> bool {
 }
 
 pub fn execute_history() -> Result<String, GitxError> {
-    let content = read_history()?;
+    let history_records = read_history()?;
 
-    let reversed = content.lines().rev().collect::<Vec<_>>().join("\n");
+    let output = history_records
+        .iter()
+        .rev()
+        .map(|record| record.to_string())
+        .collect::<Vec<_>>()
+        .join("\n");
 
-    Ok(reversed)
+    Ok(output)
 }

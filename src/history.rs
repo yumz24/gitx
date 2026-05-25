@@ -12,8 +12,8 @@ pub enum HistoryStatus {
 }
 
 struct HistoryRecord {
-    timestamp: String,     // RFC3339
-    status: HistoryStatus, // success/fail
+    timestamp: String, // RFC3339
+    status: HistoryStatus,
     command: String,
     target: String,
 }

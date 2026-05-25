@@ -59,7 +59,7 @@ pub fn execute_branch_delete(branch_name: &str) -> Result<String, GitxError> {
 }
 
 fn is_protected_branch(branch_name: &str) -> bool {
-    const PROTECTED_BRANCHES: [&str; 2] = ["main", "master"];
+    const PROTECTED_BRANCHES: [&str; 3] = ["main", "master", "develop"];
     PROTECTED_BRANCHES.contains(&branch_name)
 }
 

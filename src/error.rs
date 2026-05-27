@@ -5,6 +5,7 @@ pub enum GitxError {
     InvalidBranchArgs,
     InvalidDeleteArgs,
     InvalidExecuteHistoryArgs,
+    InvalidHistoryFilter,
     HistoryFailed(String),
     CannotDeleteCurrentBranch,
     CannotDeleteProtectedBranch,
@@ -24,7 +25,10 @@ impl fmt::Display for GitxError {
                 write!(f, "Usage: gitx delete <branch_name>")
             }
             GitxError::InvalidExecuteHistoryArgs => {
-                write!(f, "Usage: gitx history [limit]")
+                write!(f, "Usage: gitx history [limit] [filter]")
+            }
+            GitxError::InvalidHistoryFilter => {
+                write!(f, "Invalid history filter")
             }
             GitxError::CannotDeleteCurrentBranch => {
                 write!(f, "Cannot delete current branch")

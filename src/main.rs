@@ -45,7 +45,7 @@ fn run() -> Result<(), GitxError> {
         }
         Command::History => {
             let args = parse_execute_history(&mut args)?;
-            let history = execute_history(args.limit)?;
+            let history = execute_history(args.limit, args.filter)?;
             println!("{}", history);
         }
     };

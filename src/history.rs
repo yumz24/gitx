@@ -13,10 +13,10 @@ pub enum HistoryStatus {
 }
 
 pub struct HistoryRecord {
-    timestamp: String, // RFC3339
-    status: HistoryStatus,
-    command: String,
-    target: String,
+    pub timestamp: String, // RFC3339
+    pub status: HistoryStatus,
+    pub command: String,
+    pub target: String,
 }
 
 // enumから文字列への変換処理

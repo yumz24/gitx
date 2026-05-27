@@ -1,5 +1,6 @@
 use crate::branch::BranchType;
 use crate::error::GitxError;
+use core::fmt;
 use std::env::Args;
 
 pub struct BranchArgs {
@@ -14,6 +15,7 @@ pub struct DeleteArgs {
 
 pub struct ExecuteHistoryArgs {
     pub limit: Option<usize>,
+    pub filter: Option<HistoryFilter>,
 }
 
 #[derive(Debug)]
@@ -21,6 +23,12 @@ pub enum Command {
     Branch,  // ブランチ作成とチェックアウト
     Delete,  // ブランチ削除
     History, // gitxコマンドを実行した履歴を表示
+}
+
+#[derive(Debug)]
+pub enum HistoryFilter {
+    Branch,
+    Delete,
 }
 
 // 文字列からenumへの変換処理
@@ -33,6 +41,27 @@ impl std::str::FromStr for Command {
             "delete" => Ok(Command::Delete),
             "history" => Ok(Command::History),
             _ => Err(GitxError::InvalidCommand),
+        }
+    }
+}
+
+impl std::str::FromStr for HistoryFilter {
+    type Err = GitxError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "branch" => Ok(HistoryFilter::Branch),
+            "delete" => Ok(HistoryFilter::Delete),
+            _ => Err(GitxError::InvalidHistoryFilter),
+        }
+    }
+}
+
+impl fmt::Display for HistoryFilter {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            HistoryFilter::Branch => write!(f, "branch"),
+            HistoryFilter::Delete => write!(f, "delete"),
         }
     }
 }
@@ -74,16 +103,36 @@ pub fn parse_delete_args(args: &mut Args) -> Result<DeleteArgs, GitxError> {
 }
 
 pub fn parse_execute_history(args: &mut Args) -> Result<ExecuteHistoryArgs, GitxError> {
-    let limit = match args.next() {
-        Some(raw_limit) => {
-            let parsed_limit = raw_limit
-                .parse::<usize>()
-                .map_err(|_| GitxError::InvalidExecuteHistoryArgs)?;
+    let first_arg = args.next();
 
-            Some(parsed_limit)
-        }
-        None => None,
+    let (limit, filter) = match first_arg {
+        // 第一引数が[limit]なのか[filter]なのかを判定する
+        Some(raw) => match raw.parse::<usize>() {
+            // [limit]がある場合
+            Ok(limit) => {
+                let second_arg = args.next();
+
+                let filter = match second_arg {
+                    // ありなら[filter]の値がHistoryFilterの値かどうかを検証
+                    Some(raw) => Some(raw.parse::<HistoryFilter>()?),
+                    // なし
+                    None => None,
+                };
+
+                (Some(limit), filter)
+            }
+            Err(_) => {
+                // [limit]ではない場合
+                let filter = Some(raw.parse::<HistoryFilter>()?);
+                (None, filter)
+            }
+        },
+        None => (None, None),
     };
 
-    Ok(ExecuteHistoryArgs { limit })
+    if args.next().is_some() {
+        return Err(GitxError::InvalidExecuteHistoryArgs);
+    }
+
+    Ok(ExecuteHistoryArgs { limit, filter })
 }

@@ -63,15 +63,24 @@ fn is_protected_branch(branch_name: &str) -> bool {
     PROTECTED_BRANCHES.contains(&branch_name)
 }
 
-pub fn execute_history() -> Result<String, GitxError> {
+pub fn execute_history(limit: Option<usize>) -> Result<String, GitxError> {
     let history_records = read_history()?;
 
-    let output = history_records
-        .iter()
-        .rev()
-        .map(|record| record.to_string())
-        .collect::<Vec<_>>()
-        .join("\n");
+    let output = match limit {
+        Some(n) => history_records
+            .iter()
+            .rev()
+            .take(n)
+            .map(|record| record.to_string())
+            .collect::<Vec<_>>()
+            .join("\n"),
+        None => history_records
+            .iter()
+            .rev()
+            .map(|record| record.to_string())
+            .collect::<Vec<_>>()
+            .join("\n"),
+    };
 
     Ok(output)
 }

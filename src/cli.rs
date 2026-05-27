@@ -12,6 +12,10 @@ pub struct DeleteArgs {
     pub branch_name: String,
 }
 
+pub struct ExecuteHistoryArgs {
+    pub limit: Option<usize>,
+}
+
 #[derive(Debug)]
 pub enum Command {
     Branch,  // ブランチ作成とチェックアウト
@@ -67,4 +71,19 @@ pub fn parse_delete_args(args: &mut Args) -> Result<DeleteArgs, GitxError> {
     };
 
     Ok(DeleteArgs { branch_name })
+}
+
+pub fn parse_execute_history(args: &mut Args) -> Result<ExecuteHistoryArgs, GitxError> {
+    let limit = match args.next() {
+        Some(raw_limit) => {
+            let parsed_limit = raw_limit
+                .parse::<usize>()
+                .map_err(|_| GitxError::InvalidExecuteHistoryArgs)?;
+
+            Some(parsed_limit)
+        }
+        None => None,
+    };
+
+    Ok(ExecuteHistoryArgs { limit })
 }

@@ -86,5 +86,12 @@ pub fn execute_history(
         .collect::<Vec<_>>()
         .join("\n");
 
+    let header = format!(
+        "| {:<20} | {:<10} | {:<10} | {}",
+        "TIMESTAMP", "STATUS", "COMMAND", "TARGET"
+    );
+
+    let output = format!("{}\n{}", header, output);
+
     Ok(output)
 }

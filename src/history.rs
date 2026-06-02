@@ -1,4 +1,5 @@
 use crate::error::GitxError;
+use chrono::DateTime;
 use chrono::Local;
 use std::env;
 use std::fmt;
@@ -76,10 +77,15 @@ impl HistoryRecord {
 
 impl fmt::Display for HistoryRecord {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let dt = DateTime::parse_from_rfc3339(&self.timestamp).unwrap();
+
         write!(
             f,
-            "{} {} {} {}",
-            self.timestamp, self.status, self.command, self.target
+            "| {:<20} | {:<10} | {:<10} | {}",
+            dt.format("%Y-%m-%d %H:%M:%S"),
+            self.status.to_string(),
+            self.command,
+            self.target
         )
     }
 }

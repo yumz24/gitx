@@ -103,35 +103,47 @@ pub fn parse_delete_args(args: &mut Args) -> Result<DeleteArgs, GitxError> {
 }
 
 pub fn parse_execute_history(args: &mut Args) -> Result<ExecuteHistoryArgs, GitxError> {
-    let first_arg = args.next();
+    let mut limit: Option<usize> = None;
+    let mut filter: Option<HistoryFilter> = None;
 
-    let (limit, filter) = match first_arg {
-        // 第一引数が[limit]なのか[filter]なのかを判定する
-        Some(raw) => match raw.parse::<usize>() {
-            // [limit]がある場合
-            Ok(limit) => {
-                let second_arg = args.next();
+    while let Some(arg) = args.next() {
+        match arg.as_str() {
+            "--limit" | "-l" => {
+                // --limitの次の値があり、数値変換可能な値かを検証する
+                let raw = args.next().ok_or(GitxError::MissingLimitValue)?;
 
-                let filter = match second_arg {
-                    // ありなら[filter]の値がHistoryFilterの値かどうかを検証
-                    Some(raw) => Some(raw.parse::<HistoryFilter>()?),
-                    // なし
-                    None => None,
-                };
+                if limit.is_some() {
+                    // すでにlimit変数に値が格納されている場合
+                    return Err(GitxError::DuplicateHistoryOption(arg.to_string()));
+                }
 
-                (Some(limit), filter)
+                limit = Some(
+                    raw.parse::<usize>()
+                        .map_err(|_| GitxError::InvalidLimitValue)?,
+                );
             }
-            Err(_) => {
-                // [limit]ではない場合
-                let filter = Some(raw.parse::<HistoryFilter>()?);
-                (None, filter)
-            }
-        },
-        None => (None, None),
-    };
+            "--filter" | "-f" => {
+                // filterの検証
+                let raw = args.next().ok_or(GitxError::MissingHistoryFilterValue)?;
 
-    if args.next().is_some() {
-        return Err(GitxError::InvalidExecuteHistoryArgs);
+                if filter.is_some() {
+                    // すでにfilter変数に値が格納されている場合
+                    return Err(GitxError::DuplicateHistoryOption(arg.to_string()));
+                }
+
+                filter = Some(
+                    raw.parse::<HistoryFilter>()
+                        .map_err(|_| GitxError::InvalidHistoryFilter)?,
+                )
+            }
+            _ => {
+                if arg.starts_with("-") {
+                    return Err(GitxError::UnknownHistoryOption(arg.to_string()));
+                } else {
+                    return Err(GitxError::UnknownHistoryArguments(arg.to_string()));
+                }
+            }
+        }
     }
 
     Ok(ExecuteHistoryArgs { limit, filter })

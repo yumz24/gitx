@@ -4,8 +4,13 @@ pub enum GitxError {
     InvalidCommand,
     InvalidBranchArgs,
     InvalidDeleteArgs,
-    InvalidExecuteHistoryArgs,
+    MissingLimitValue,
+    InvalidLimitValue,
+    MissingHistoryFilterValue,
     InvalidHistoryFilter,
+    UnknownHistoryOption(String),
+    UnknownHistoryArguments(String),
+    DuplicateHistoryOption(String),
     HistoryFailed(String),
     CannotDeleteCurrentBranch,
     CannotDeleteProtectedBranch,
@@ -24,11 +29,26 @@ impl fmt::Display for GitxError {
             GitxError::InvalidDeleteArgs => {
                 write!(f, "Usage: gitx delete <branch_name>")
             }
-            GitxError::InvalidExecuteHistoryArgs => {
-                write!(f, "Usage: gitx history [limit] [filter]")
+            GitxError::MissingLimitValue => {
+                write!(f, "Missing value for --limit, -l")
+            }
+            GitxError::InvalidLimitValue => {
+                write!(f, "--limit expexts a number")
+            }
+            GitxError::MissingHistoryFilterValue => {
+                write!(f, "Missing value for --filter, -f")
             }
             GitxError::InvalidHistoryFilter => {
                 write!(f, "Invalid history filter")
+            }
+            GitxError::UnknownHistoryOption(option) => {
+                write!(f, "Unknown history option: {}", option)
+            }
+            GitxError::UnknownHistoryArguments(args) => {
+                write!(f, "Unknown history argument: {}", args)
+            }
+            GitxError::DuplicateHistoryOption(option) => {
+                write!(f, "option '{}' cannot be used multiple times", option)
             }
             GitxError::CannotDeleteCurrentBranch => {
                 write!(f, "Cannot delete current branch")

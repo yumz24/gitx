@@ -66,5 +66,10 @@ gitx delete feat/#123-add-login
 ### Show history
 
 ```bash
+gitx branch feat 10 improve-history-display
+gitx delete feat/#10-improve-history-display
 gitx history
+gitx history -l 5
+gitx history -f branch
+gitx history -l 5 -f delete
 ```

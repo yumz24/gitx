@@ -1,4 +1,5 @@
 use crate::branch::{BranchType, build_branch_name};
+use crate::cli::HistoryFilter;
 use crate::debug;
 use crate::error::GitxError;
 use crate::git::{git_branch, git_current_branch, git_delete};
@@ -63,10 +64,34 @@ fn is_protected_branch(branch_name: &str) -> bool {
     PROTECTED_BRANCHES.contains(&branch_name)
 }
 
-pub fn execute_history() -> Result<String, GitxError> {
-    let content = read_history()?;
+pub fn execute_history(
+    limit: Option<usize>,
+    filter: Option<HistoryFilter>,
+) -> Result<String, GitxError> {
+    let history_records = read_history()?;
 
-    let reversed = content.lines().rev().collect::<Vec<_>>().join("\n");
+    let iter = history_records.iter().rev();
 
-    Ok(reversed)
+    // 引数のfilterに値があるなら、一致するrecordのみを抽出、そうでななら、全てを返却
+    let filtered = iter.filter(|record| match &filter {
+        Some(history_filter) => record.command == history_filter.to_string(),
+        None => true,
+    });
+
+    // limitがあるなら、その件数分のみを抽出、そうでないなら全件返却
+    let limited = filtered.take(limit.unwrap_or(usize::MAX));
+
+    let output = limited
+        .map(|record| record.to_string())
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    let header = format!(
+        "| {:<20} | {:<10} | {:<10} | {}",
+        "TIMESTAMP", "STATUS", "COMMAND", "TARGET"
+    );
+
+    let output = format!("{}\n{}", header, output);
+
+    Ok(output)
 }

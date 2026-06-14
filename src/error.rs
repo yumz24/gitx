@@ -14,7 +14,7 @@ pub enum GitxError {
     HistoryFailed(String),
     CannotDeleteCurrentBranch,
     CannotDeleteProtectedBranch,
-    GitCommandFailed(String),
+    GitCommandFailed { command: String, stderr: String },
 }
 
 impl fmt::Display for GitxError {
@@ -56,8 +56,8 @@ impl fmt::Display for GitxError {
             GitxError::CannotDeleteProtectedBranch => {
                 write!(f, "Cannot delete protected branch")
             }
-            GitxError::GitCommandFailed(err) => {
-                write!(f, "{}", err)
+            GitxError::GitCommandFailed { command, stderr } => {
+                write!(f, "git command failed: {}\n{}", command, stderr,)
             }
             GitxError::HistoryFailed(err) => {
                 write!(f, "{}", err)
